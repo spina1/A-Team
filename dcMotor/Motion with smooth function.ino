@@ -173,8 +173,9 @@ double SmoothFunction(double);
 double SmoothFunction(double x)
 {
     
-    double output;
-    
+  double output;
+  
+  // Definition of sigmoid curve (logistic type)	
   output = 1/(1+exp(-(10*x - 5)));
   
   return output;

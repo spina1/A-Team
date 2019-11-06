@@ -6,7 +6,8 @@ const int IN3 = 10;
 const int IN4 = 9;
 const int ENB = 11;
 
-void setup() {
+void setup() 
+{
   pinMode(IN1, OUTPUT);
   pinMode(IN2, OUTPUT);
   pinMode(ENA, OUTPUT);
@@ -14,24 +15,32 @@ void setup() {
   pinMode(IN4, OUTPUT);
   pinMode(IN3, OUTPUT);
   pinMode(ENB, OUTPUT);
+
+  
 }
 
-void loop() {
- // Move forward for one second at 50% speed
-Smooth_Forward(50, 1000);
+//This corresponds to 3 times the mechanical time constant of the motor-robot system in ms.
+double winduptime = 300;
+
+void loop() 
+{
+	
+ // Move forward for one second at 100% speed
+Smooth_Forward(100, 1000);
+
+
+// Brake for one second
 Motor1_Brake();
 Motor2_Brake();
-delay(100);
+delay(1000);
 
-//Motor1_Forward(150);
-//Motor2_Forward(150);
-//delay(1000);
-//Motor1_Brake();
-//Motor2_Brake();
-//delay(100);
-//Motor1_Backward(200);
-//Motor2_Backward(200);
-//delay(1000);
+ // Move backward for one second at 100% speed
+Smooth_Backward(100, 1000);
+
+Motor1_Brake();
+Motor2_Brake();
+delay(1000);
+
 }
 void Motor1_Backward(int Speed)
 {
@@ -74,46 +83,88 @@ void Motor2_Brake()
 // This function is meant to slowly ramp up the motor, to negate sharp input currents. It is not designed (yet) to mitigate wheel slippage
 void Smooth_Forward(int speed, int duration)
 {
-	double i = 0;
-	// Leave this at 100 (ms) for now
-	double winduptime = 100;
-	// Time step of 1 millisecond
-	double ts = 1;
-	// Placeholder value between 0 and 1 - must be scaled to be between 0 and 255 to become z
-	double y = 0;
-	// Value to be passed to the motor (Must be 8 bit integer)
-	int z = 0;
-	
-	while (i < duration)
-	{
-		// Smooth ramping up during wind-up transient
-		if(i <= winduptime)
-		{
-			y = SmoothFunction(i/winduptime);
-		}
-		
-		// Smooth ramping down during wind-down transient
-		else if (i >= duration - winduptime)
-		{
-			y = Smoothfunction(-(i - duration)/winduptime);
-		}
-		// Constant value during steady state
-		else
-		{
-			y = 1;
-		}
-		
-		// Normalize y to between 0 and 255
-		y = round(y*255*speed/100);
-		
-		z = (int) y;
-		Motor1_Forward(z);
-		Motor2_Forward(z);
-		i += ts;
-		delay(ts);
-	}
+  double i = 0;
+  // Time step of 1 millisecond
+  double ts = 1;
+  // Placeholder value between 0 and 1 - must be scaled to be between 0 and 255 to become z
+  double y = 0;
+  // Value to be passed to the motor (Must be 8 bit integer)
+  int z = 0;
+  
+  while (i < duration)
+  {
+    // Smooth ramping up during wind-up transient
+    if(i <= winduptime)
+    {
+      y = SmoothFunction(i/winduptime);
+    }
+    
+    // Smooth ramping down during wind-down transient
+    else if (i >= duration - winduptime)
+    {
+      y = SmoothFunction(-(i - duration)/winduptime);
+    }
+    // Constant value during steady state
+    else
+    {
+      y = 1;
+    }
+    
+    // Normalize y to between 0 and 255
+    y = round(y*255*speed/100);
+    
+    z = (int) y;
+    Motor1_Forward(z);
+    Motor2_Forward(z);
+    i += ts;
+    delay(ts);
+  }
 
 }
+
+void Smooth_Backward(int speed, int duration)
+{
+  double i = 0;
+  // Time step of 1 millisecond
+  double ts = 1;
+  // Placeholder value between 0 and 1 - must be scaled to be between 0 and 255 to become z
+  double y = 0;
+  // Value to be passed to the motor (Must be 8 bit integer)
+  int z = 0;
+  
+  while (i < duration)
+  {
+    // Smooth ramping up during wind-up transient
+    if(i <= winduptime)
+    {
+      y = SmoothFunction(i/winduptime);
+    }
+    
+    // Smooth ramping down during wind-down transient
+    else if (i >= duration - winduptime)
+    {
+      y = SmoothFunction(-(i - duration)/winduptime);
+    }
+    // Constant value during steady state
+    else
+    {
+      y = 1;
+    }
+    
+    // Normalize y to between 0 and 255
+    y = round(y*255*speed/100);
+    
+    z = (int) y;
+    Motor1_Backward(z);
+    Motor2_Backward(z);
+    i += ts;
+    delay(ts);
+  }
+
+}
+
+// Is this declaration necessary? Who knows
+double SmoothFunction(double);
 
 // SmoothFunction is normalized to go from 0 to 1 between x=0 to x=1
 double SmoothFunction(double x)
@@ -121,7 +172,7 @@ double SmoothFunction(double x)
     
     double output;
     
-	output = 1/(1+exp(-(10*x - 5)));
-	
-	return output;
+  output = 1/(1+exp(-(10*x - 5)));
+  
+  return output;
 }

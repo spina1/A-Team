@@ -124,6 +124,7 @@ void Smooth_Forward(int speed, int duration)
 
 }
 
+// Perhaps integrate this and Smooth_Forward into one function to save on space
 void Smooth_Backward(int speed, int duration)
 {
   double i = 0;

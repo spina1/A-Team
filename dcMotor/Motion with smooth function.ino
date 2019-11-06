@@ -1,10 +1,12 @@
+const int ENA = 6;
 const int IN1 = 5;
 const int IN2 = 4;
-const int ENA = 6;
 
+
+const int ENB = 11;
 const int IN3 = 10;
 const int IN4 = 9;
-const int ENB = 11;
+
 
 void setup() 
 {
